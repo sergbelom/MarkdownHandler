@@ -2,7 +2,7 @@
   "profiles": {
     "MarkdownHandler": {
       "commandName": "Project",
-      "commandLineArgs": "help"
+      "commandLineArgs": "-f hdis dsfd"
     }
   }
 }

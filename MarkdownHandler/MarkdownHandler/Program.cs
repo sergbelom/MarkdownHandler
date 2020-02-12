@@ -1,53 +1,54 @@
-﻿using System;
+﻿using NLog;
+using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Text;
 using CommandLine;
-using CommandLine.Text;
 
 namespace MarkdownHandler
 {
+    static class Logger
+    {
+        public static NLog.Logger Log;
+
+        /// <summary>
+        /// Create text log file.
+        /// </summary>
+        public static void CreateLogFile()
+        {
+            var config = new NLog.Config.LoggingConfiguration();
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = Path.Combine(Directory.GetCurrentDirectory(),
+                String.Concat( nameof(MarkdownHandler), DateTime.Now.ToString("dd_MM_yyyy_hh_mm_ss"), ".log")) };
+            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+            LogManager.Configuration = config;
+            var logger = LogManager.GetCurrentClassLogger();
+            logger.Info("Log created!");
+            Log = logger;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
+            Logger.CreateLogFile();
             Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(o =>
-                {
-                    if (o.Help)
-                    {
-                        Console.WriteLine($"Verbose output enabled. Current Arguments: -v {o.Help}");
-                        Console.WriteLine("Quick Start Example! App is in Verbose mode!");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Current Arguments: -v {o.Help}");
-                        Console.WriteLine("Quick Start Example!");
-                    }
-                });
+                .WithParsed(RunOptions)
+                .WithNotParsed(HandleParseError);
+            Console.ReadKey();
         }
 
         static void RunOptions(Options opts)
         {
-            if (opts.Help)
-                PrintHelp();
-            //handle options
-        }
-        static void HandleParseError(IEnumerable<Error> errs)
-        {
-            //handle errors
+            var files = opts.Files;
+            Logger.Log.Info("Input Files= {0}", String.Join(",", files));
         }
 
-        private static void PrintHelp()
+        static void HandleParseError(IEnumerable<Error> errors)
         {
-            var result = new StringBuilder();
-
-            result.AppendLine("Hello, and welcome to the  console application.");
-            result.AppendLine("This application takes in a data file and attempts to import that data into our systems.");
-            result.AppendLine("Valid options are:");
-            //result.AppendLine(HelpText.AutoBuild(args));
-            result.AppendLine("Press any key to exit");
-
-            Console.Write(result);
+            foreach (var error in errors)
+                Logger.Log.Error(error.Tag.ToString());
         }
     }
 }

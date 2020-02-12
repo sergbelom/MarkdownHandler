@@ -2,7 +2,7 @@
   "profiles": {
     "MarkdownHandler": {
       "commandName": "Project",
-      "commandLineArgs": "-f hdis dsfd"
+      "commandLineArgs": "-f D:\\MD_test\\test_file_1.md D:\\MD_test\\test_file_2.md D:\\MD_test\\test_file_3.md D:\\MD_test\\test_file_4.md D:\\MD_test\\test_file_5.md D:\\MD_test\\test_file_1.markdown"
     }
   }
 }

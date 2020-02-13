@@ -1,70 +1,89 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NLog;
+using System.Collections.Generic;
 using CommandLine;
 
 namespace MarkdownHandler
 {
-    static class Logger
-    {
-        public static NLog.Logger Log;
-
-        /// <summary>
-        /// Create log instance 
-        /// </summary>
-        public static void CreateLog()
-        {
-            var config = new NLog.Config.LoggingConfiguration();
-            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = Path.Combine(Directory.GetCurrentDirectory(),
-                String.Concat(nameof(MarkdownHandler), DateTime.Now.ToString("dd_MM_yyyy_hh_mm_ss"), ".log"))};
-            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
-            config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
-            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
-            LogManager.Configuration = config;
-            var logger = LogManager.GetCurrentClassLogger();
-            logger.Info("Log created!");
-            Log = logger;
-        }
-    }
-
     class Program
     {
-        static void Main(string[] args)
+        private static readonly Logger _logger = new Logger();
+
+        private static int _countFilesRead;
+
+        //todo: make better
+        private static ICollection<String> _imageTags = new List<string>();
+
+        private static ICollection<String> _tableTags = new List<string>();
+
+        private static void Main(string[] args)
         {
-            Logger.CreateLog();
+            _logger.CreateLog();
+            ReadAppSettings();
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(RunOptions)
                 .WithNotParsed(HandleParseError);
             Console.ReadKey();
         }
 
-        private static int _filesRead;
+        private static void ReadAppSettings()
+        {
+            _imageTags = SettingsReader.ReadAppSettings(nameof(_imageTags).Replace("_",""));
+            _logger.Log.Info("Image Tags: {0}", String.Join(' ', _imageTags));
+            _tableTags = SettingsReader.ReadAppSettings(nameof(_tableTags).Replace("_", ""));
+            _logger.Log.Info("Table Tags: {0}", String.Join(' ', _tableTags));
+        }
 
-        static void RunOptions(Options opts)
+        private static void RunOptions(Options opts)
         {
             var mdFiles = opts.Files;
-            Logger.Log.Info("Input Files= {0}", String.Join(",", mdFiles));
-            Logger.Log.Info("Starting to read files! Count: {0}", mdFiles.Count());
-            Parallel.ForEach(mdFiles, DoStuff);
-            Logger.Log.Info("Finish! Read {0} file(s).", _filesRead);
+            _logger.Log.Info("Input Files= {0}", String.Join(", ", mdFiles));
+            _logger.Log.Info("Starting to read files! Count: {0}", mdFiles.Count());
+            Parallel.ForEach(mdFiles, StartProcess);
+            _logger.Log.Info("Finish! Read {0} file(s).", _countFilesRead);
 
         }
 
-        static void HandleParseError(IEnumerable<Error> errors)
+        private static void HandleParseError(IEnumerable<Error> errors)
         {
             foreach (var error in errors)
-                Logger.Log.Error(error.Tag.ToString());
+                _logger.Log.Error(error.Tag.ToString());
         }
 
-        private static void DoStuff(string filePath)
+        private static void StartProcess(string filePath)
         {
-            string fileName = Path.GetFileName(filePath);
-            Logger.Log.Info("[{0}] {1}: ", Thread.CurrentThread.ManagedThreadId, fileName);
-            _filesRead++;
+            //_logger.Log.Info("[{0}]: {1} ", Thread.CurrentThread.ManagedThreadId, filePath);
+            CalcImageAndTable(filePath);
+            _countFilesRead++;
+        }
+
+        private static void CalcImageAndTable(string filePath)
+        {
+            string[] lines = File.ReadAllLines(filePath);
+            //_logger.Log.Info("[{0}] line count: {1} ", filePath, lines.Length);
+            int countImage = 0;
+            int countTable = 0;
+            //todo: make better, may be to AppSettings
+            char tagPrefix = '<';
+            char tagPostfix = '>';
+
+            foreach (var line in lines)
+            {
+                if (_imageTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s))))
+                {
+                    countImage++;
+                    //_logger.Log.Info(line);
+                }
+                if (_tableTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s))))
+                {
+                    countTable++;
+                    _logger.Log.Info(line);
+                }
+            }
+            _logger.Log.Info("File: {0} contains {1} lines, {2} images and {3} tables.", filePath, lines.Length, countImage, countTable);
         }
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "MarkdownHandler": {
       "commandName": "Project",
-      "commandLineArgs": "-f D:\\MD_test\\1.md D:\\MD_test\\2.md D:\\MD_test\\3.md D:\\MD_test\\4.md D:\\MD_test\\5.md D:\\MD_test\\6.md D:\\MD_test\\7.md D:\\MD_test\\8.md D:\\MD_test\\9.md D:\\MD_test\\10.md D:\\MD_test\\11.md"
+      "commandLineArgs": "-f D:\\MD_test\\1.md D:\\MD_test\\2.md D:\\MD_test\\3.md D:\\MD_test\\4.md D:\\MD_test\\5.md D:\\MD_test\\6.md D:\\MD_test\\7.md D:\\MD_test\\8.md D:\\MD_test\\9.md D:\\MD_test\\10.md D:\\MD_test\\12.md -r"
     }
   }
 }

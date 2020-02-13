@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Threading;
 using CommandLine;
 
 namespace MarkdownHandler
@@ -10,6 +12,8 @@ namespace MarkdownHandler
     class Program
     {
         private static readonly Logger _logger = new Logger();
+
+        private static Report _report = new Report();
 
         private static int _countFilesRead;
 
@@ -21,11 +25,11 @@ namespace MarkdownHandler
         private static void Main(String[] args)
         {
             _logger.CreateLog();
-            ReadAppSettings();
+            ReadAppSettings(); //todo: add appsetting for ext file
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(RunOptions)
                 .WithNotParsed(HandleParseError);
-            Console.ReadKey();
+            Console.ReadKey(); //todo: make read cmd arg
         }
 
         private static void ReadAppSettings()
@@ -36,20 +40,19 @@ namespace MarkdownHandler
             _logger.Log.Info("Table Tags: {0}", String.Join(' ', _tableTags));
         }
 
-        private static void PrintReport(Dictionary<String, String> result)
-        {
-            Console.WriteLine("\n File name: {0} \n\t count of lines: {1} \n\t count of images: {2} \n\t count of tables: {3} \n",
-                    result["fileName"], result["countLines"], result["countImages"], result["countTables"]);
-        }
-
         private static void RunOptions(Options opts)
         {
-            var mdFiles = opts.Files;
-            _logger.Log.Info("Input Files= {0}", String.Join(", ", mdFiles));
-            _logger.Log.Info("Starting to read files! Count: {0}", mdFiles.Count());
-            Parallel.ForEach(mdFiles, StartProcess);
-            _logger.Log.Info("Finish! Read {0} file(s).", _countFilesRead);
-
+            if (opts.Files.Count() != 0)
+            {
+                var mdFiles = opts.Files; //todo: make delete dublicate
+                _logger.Log.Info("Input Files= {0}", String.Join(", ", mdFiles));
+                _logger.Log.Info("Starting to read files! Count: {0}", mdFiles.Count());
+                Parallel.ForEach(mdFiles, StartProcess);
+                _logger.Log.Info("Finish! Read {0} file(s).", _countFilesRead);
+                _report.IsFinished = true;
+                if (opts.Report && _report.IsFinished)
+                    _report.PrintReport();
+            }
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
@@ -60,16 +63,22 @@ namespace MarkdownHandler
 
         private static void StartProcess(String filePath)
         {
-            //_logger.Log.Info("[{0}]: {1} ", Thread.CurrentThread.ManagedThreadId, filePath);
+            _logger.Log.Info("[{0}]: {1} ", Thread.CurrentThread.ManagedThreadId, filePath);
             CalcImageAndTable(filePath);
             _countFilesRead++;
         }
 
+        //todo: make class
         private static void CalcImageAndTable(String filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                _logger.Log.Warn("File: {0} not exist!", filePath);
+                return;
+            }
+
             String[] lines = File.ReadAllLines(filePath);
             Dictionary<String, String> result = new Dictionary<string, string>();
-            //_logger.Log.Info("[{0}] line count: {1} ", filePath, lines.Length);
             int countImage = 0;
             int countTable = 0;
             //todo: make better, may be to AppSettings
@@ -90,12 +99,7 @@ namespace MarkdownHandler
                 }
             }
             _logger.Log.Info("File: {0} contains {1} lines, {2} images and {3} tables.", filePath, lines.Length, countImage, countTable);
-
-            result.Add("fileName", filePath);
-            result.Add("countLines", lines.Length.ToString());
-            result.Add("countImages", countImage.ToString());
-            result.Add("countTables", countTable.ToString());
-            PrintReport(result);
+            _report.Data.Add(filePath, new StringCollection() {lines.Length.ToString(),countImage.ToString(),countTable.ToString()});
         }
     }
 }

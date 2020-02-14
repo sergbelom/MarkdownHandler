@@ -29,7 +29,14 @@ namespace MarkdownHandler
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(RunOptions)
                 .WithNotParsed(HandleParseError);
-            Console.ReadKey(); //todo: make read cmd arg
+            //if (_report.IsFinished)
+            //{
+            //    Console.WriteLine("Input -r for print report");
+            //    var cmd = Console.Read().ToString().Split();
+            //    Parser.Default.ParseArguments<Options>(cmd)
+            //        .WithParsed(RunOptions);
+            //}
+            Console.ReadKey();
         }
 
         private static void ReadAppSettings()
@@ -44,15 +51,22 @@ namespace MarkdownHandler
         {
             if (opts.Files.Count() != 0)
             {
-                var mdFiles = opts.Files; //todo: make delete dublicate
+                var mdFiles = opts.Files.ToList(); //todo: make delete dublicate
                 _logger.Log.Info("Input Files= {0}", String.Join(", ", mdFiles));
                 _logger.Log.Info("Starting to read files! Count: {0}", mdFiles.Count());
+
+                _report.Summary.Add("count of files", mdFiles.Count());
+                _report.Summary.Add("count of images", 0);
+                _report.Summary.Add("count of tables", 0);
+
                 Parallel.ForEach(mdFiles, StartProcess);
                 _logger.Log.Info("Finish! Read {0} file(s).", _countFilesRead);
                 _report.IsFinished = true;
                 if (opts.Report && _report.IsFinished)
                     _report.PrintReport();
             }
+            //if (opts.Report && _report.IsFinished)
+            //    _report.PrintReport();
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
@@ -78,7 +92,6 @@ namespace MarkdownHandler
             }
 
             String[] lines = File.ReadAllLines(filePath);
-            Dictionary<String, String> result = new Dictionary<string, string>();
             int countImage = 0;
             int countTable = 0;
             //todo: make better, may be to AppSettings
@@ -88,18 +101,14 @@ namespace MarkdownHandler
             foreach (var line in lines)
             {
                 if (_imageTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s))))
-                {
                     countImage++;
-                    //_logger.Log.Info(line);
-                }
                 if (_tableTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s))))
-                {
                     countTable++;
-                    //_logger.Log.Info(line);
-                }
             }
             _logger.Log.Info("File: {0} contains {1} lines, {2} images and {3} tables.", filePath, lines.Length, countImage, countTable);
-            _report.Data.Add(filePath, new StringCollection() {lines.Length.ToString(),countImage.ToString(),countTable.ToString()});
+            _report.Data.Add(filePath, new int[] {lines.Length,countImage,countTable});
+            _report.Summary["count of images"] += countImage;
+            _report.Summary["count of tables"] += countTable;
         }
     }
 }

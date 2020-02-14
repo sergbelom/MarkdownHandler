@@ -1,18 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Text;
+using System.Linq;
 
 namespace MarkdownHandler
 {
     class Report
     {
-        private IDictionary<String, StringCollection> _data;
+        private SortedDictionary<String, int[]> _data;
 
-        public IDictionary<String, StringCollection> Data
+        public SortedDictionary<String, int[]> Data
         {
             get => _data;
             set { _data = value; }
+        }
+
+        private IDictionary<String, int> _summary;
+
+        public IDictionary<String, int> Summary
+        {
+            get => _summary;
+            set { _summary = value; }
         }
 
         private bool _isFinished;
@@ -25,7 +33,8 @@ namespace MarkdownHandler
 
         public Report()
         {
-            _data = new Dictionary<string, StringCollection>();
+            _data = new SortedDictionary<String, int[]>();
+            _summary = new Dictionary<String, int>();
             _isFinished = false;
         }
 
@@ -36,14 +45,14 @@ namespace MarkdownHandler
                 Console.WriteLine("Data for report is empty!");
                 return;
             }
-
-            //todo: make soooooooooooooooooooooooort data before print
+            Console.WriteLine("\nReport:");
             foreach (var file in _data)
-            {
                 Console.WriteLine(
-                    "\n File name: {0} \n\t count of lines: {1} \n\t count of images: {2} \n\t count of tables: {3} \n",
+                    "\nFile name: {0} \n\t count of lines: {1} \n\t count of images: {2} \n\t count of tables: {3}",
                     file.Key, file.Value[0], file.Value[1], file.Value[2]);
-            }
+            Console.WriteLine("\nSummary:");
+            foreach (var line in _summary)
+                Console.WriteLine("\t{0} {1}", line.Key, line.Value);
         }
     }
 }

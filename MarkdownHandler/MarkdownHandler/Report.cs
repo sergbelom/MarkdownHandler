@@ -21,20 +21,15 @@ namespace MarkdownHandler
             get => _summary;
             set { _summary = value; }
         }
-
-        private bool _isFinished;
-
-        public bool IsFinished
-        {
-            get => _isFinished;
-            set { _isFinished = value; }
-        }
-
+        
         public Report()
         {
             _data = new SortedDictionary<String, int[]>();
             _summary = new Dictionary<String, int>();
-            _isFinished = false;
+            _summary.Add("count of files", 0);
+            _summary.Add("count of images", 0);
+            _summary.Add("count of tables", 0);
+            _summary.Add("count of caption", 0);
         }
 
         public void PrintReport()
@@ -47,8 +42,8 @@ namespace MarkdownHandler
             Console.WriteLine("\nReport:");
             foreach (var file in _data)
                 Console.WriteLine(
-                    "\nFile name: {0} \n\t count of lines: {1} \n\t count of images: {2} \n\t count of tables: {3}",
-                    file.Key, file.Value[0], file.Value[1], file.Value[2]);
+                    "\nFile name: {0} \n\t count of lines: {1} \n\t count of images: {2} \n\t count of tables: {3} count of captions: {4}",
+                    file.Key, file.Value[0], file.Value[1], file.Value[2], file.Value[3]);
             Console.WriteLine("\nSummary:");
             foreach (var line in _summary)
                 Console.WriteLine("\t{0}: {1}", line.Key, line.Value);

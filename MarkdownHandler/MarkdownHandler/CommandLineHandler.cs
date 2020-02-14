@@ -18,13 +18,13 @@ namespace MarkdownHandler
         /// <summary>
         /// Bool property for generate report about input files.
         /// </summary>
-        [Option('r', "report", Required = false, HelpText = "Get report about count tables and figures.")]
-        public bool Report { get; set; }
+        //[Option('r', "report", Required = false, HelpText = "Get report about count tables and figures.")]
+        //public bool Report { get; set; }
 
         /// <summary>
         /// Bool property for check correct captions for figure and tables.
         /// </summary>
-        [Option('c', "check-captions", Required = false, HelpText = "Check correct captions for figure and tables.")]
-        public bool Check { get; set; }
+        //[Option('c', "check-captions", Required = false, HelpText = "Check correct captions for figure and tables.")]
+        //public bool Check { get; set; }
     }
 }

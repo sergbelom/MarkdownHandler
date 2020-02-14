@@ -13,7 +13,7 @@ namespace MarkdownHandler
         /// <summary>
         /// Create log instance 
         /// </summary>
-        public void CreateLog()
+        public Logger()
         {
             var config = new NLog.Config.LoggingConfiguration();
             var logfile = new NLog.Targets.FileTarget("logfile")

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 
 namespace MarkdownHandler
 {
@@ -52,7 +51,7 @@ namespace MarkdownHandler
                     file.Key, file.Value[0], file.Value[1], file.Value[2]);
             Console.WriteLine("\nSummary:");
             foreach (var line in _summary)
-                Console.WriteLine("\t{0} {1}", line.Key, line.Value);
+                Console.WriteLine("\t{0}: {1}", line.Key, line.Value);
         }
     }
 }

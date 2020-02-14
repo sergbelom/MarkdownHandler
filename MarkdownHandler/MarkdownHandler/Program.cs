@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Threading;
 using CommandLine;
+using System.Collections.Specialized;
 
 namespace MarkdownHandler
 {
@@ -18,33 +18,28 @@ namespace MarkdownHandler
         private static int _countFilesRead;
 
         //todo: make better
-        private static ICollection<String> _imageTags = new List<String>();
+        private static ICollection<String> _imageTags = ReadAppSettings(nameof(_imageTags));
 
-        private static ICollection<String> _tableTags = new List<String>();
+        private static ICollection<String> _tableTags = ReadAppSettings(nameof(_tableTags));
+
+        private static ICollection<String> _captionTags = ReadAppSettings(nameof(_captionTags));
+
+        private static ICollection<String> _captionContent = ReadAppSettings(nameof(_captionContent));
 
         private static void Main(String[] args)
         {
             _logger.CreateLog();
-            ReadAppSettings(); //todo: add appsetting for ext file
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(RunOptions)
                 .WithNotParsed(HandleParseError);
-            //if (_report.IsFinished)
-            //{
-            //    Console.WriteLine("Input -r for print report");
-            //    var cmd = Console.Read().ToString().Split();
-            //    Parser.Default.ParseArguments<Options>(cmd)
-            //        .WithParsed(RunOptions);
-            //}
             Console.ReadKey();
         }
 
-        private static void ReadAppSettings()
+        private static List<String> ReadAppSettings(String tagName)
         {
-            _imageTags = SettingsReader.ReadAppSettings(nameof(_imageTags).Replace("_",""));
-            _logger.Log.Info("Image Tags: {0}", String.Join(' ', _imageTags));
-            _tableTags = SettingsReader.ReadAppSettings(nameof(_tableTags).Replace("_", ""));
-            _logger.Log.Info("Table Tags: {0}", String.Join(' ', _tableTags));
+            tagName = tagName.Replace("_", "");
+            List<String> result = SettingsReader.ReadAppSettings(tagName).ToList();
+            return result;
         }
 
         private static void RunOptions(Options opts)
@@ -52,7 +47,7 @@ namespace MarkdownHandler
             if (opts.Files.Count() != 0)
             {
                 var mdFiles = opts.Files.ToList(); //todo: make delete dublicate
-                _logger.Log.Info("Input Files= {0}", String.Join(", ", mdFiles));
+                _logger.Log.Info("Input Files: {0}", String.Join(", ", mdFiles));
                 _logger.Log.Info("Starting to read files! Count: {0}", mdFiles.Count());
 
                 _report.Summary.Add("count of files", mdFiles.Count());
@@ -62,11 +57,8 @@ namespace MarkdownHandler
                 Parallel.ForEach(mdFiles, StartProcess);
                 _logger.Log.Info("Finish! Read {0} file(s).", _countFilesRead);
                 _report.IsFinished = true;
-                if (opts.Report && _report.IsFinished)
-                    _report.PrintReport();
+                _report.PrintReport();
             }
-            //if (opts.Report && _report.IsFinished)
-            //    _report.PrintReport();
         }
 
         private static void HandleParseError(IEnumerable<Error> errors)
@@ -94,21 +86,45 @@ namespace MarkdownHandler
             String[] lines = File.ReadAllLines(filePath);
             int countImage = 0;
             int countTable = 0;
+            int countCaption = 0;
             //todo: make better, may be to AppSettings
             char tagPrefix = '<';
             char tagPostfix = '>';
 
+            bool captionCheck = false;
+
             foreach (var line in lines)
             {
+                if (captionCheck && _captionTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s, tagPostfix))))
+                {
+                    if (IsCorrectCaption(line))
+                    {
+                        countCaption++;
+                    }
+                    continue;
+                }
                 if (_imageTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s))))
+                {
                     countImage++;
-                if (_tableTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s))))
+                    captionCheck = true;
+                }
+                else if (_tableTags.Any(s => line.Trim().StartsWith(String.Concat(tagPrefix, s))))
+                {
                     countTable++;
+                    captionCheck = true;
+                }
             }
-            _logger.Log.Info("File: {0} contains {1} lines, {2} images and {3} tables.", filePath, lines.Length, countImage, countTable);
-            _report.Data.Add(filePath, new int[] {lines.Length,countImage,countTable});
+            _logger.Log.Info("File: {0} contains {1} lines, {2} images, {3} tables and {4} caption",
+                filePath, lines.Length, countImage, countTable, countCaption);
+            _report.Data.Add(filePath, new int[] {lines.Length, countImage, countTable, countCaption});
             _report.Summary["count of images"] += countImage;
             _report.Summary["count of tables"] += countTable;
+            _report.Summary["count of caption"] += countCaption;
+        }
+
+        private static bool IsCorrectCaption(String line)
+        {
+            return _captionContent.Any(s => line.Contains(s));
         }
     }
 }

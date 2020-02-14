@@ -27,7 +27,7 @@ namespace MarkdownHandler {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
             "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
-            "tring>img</string>\r\n  <string>svg</string>\r\n</ArrayOfString>")]
+            "tring>img</string>\r\n</ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection imageTags {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["imageTags"]));
@@ -42,6 +42,28 @@ namespace MarkdownHandler {
         public global::System.Collections.Specialized.StringCollection tableTags {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["tableTags"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
+            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
+            "tring>p</string>\r\n</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection captionTags {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["captionTags"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
+            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
+            "tring>Рисунок</string>\r\n  <string>Таблица</string>\r\n</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection captionContent {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["captionContent"]));
             }
         }
     }

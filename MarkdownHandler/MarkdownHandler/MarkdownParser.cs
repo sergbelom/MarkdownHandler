@@ -7,33 +7,30 @@ namespace MarkdownHandler
 {
     class MarkdownParser
     {
+        //TODO:
         private static readonly Logger _logger = Program.logger;
 
         private static readonly Report _report = Program.report;
 
-        private static readonly ICollection<String> _imageTags = ReadAppSettings(nameof(_imageTags));
+        private static readonly ICollection<String> _imageTags = SettingsReader.ReadAppSettings(nameof(_imageTags));
 
-        private static readonly ICollection<String> _tableTags = ReadAppSettings(nameof(_tableTags));
+        private static readonly ICollection<String> _tableTags = SettingsReader.ReadAppSettings(nameof(_tableTags));
 
-        private static readonly ICollection<String> _captionTags = ReadAppSettings(nameof(_captionTags));
+        private static readonly ICollection<String> _captionTags = SettingsReader.ReadAppSettings(nameof(_captionTags));
 
-        private static readonly ICollection<String> _captionContent = ReadAppSettings(nameof(_captionContent));
+        private static readonly ICollection<String> _captionContent = SettingsReader.ReadAppSettings(nameof(_captionContent));
 
         private string _pathToFile;
-
-        /// <summary>
-        /// Path to checking file.
-        /// </summary>
-        public string PathToFile
-        {
-            get => _pathToFile;
-            set { _pathToFile = value; }
-        }
-
-        //TODO: make better
+        
+        //TODO:
         private char _tagPrefix = '<';
+
         private char _tagPostfix = '>';
 
+        /// <summary>
+        /// MarkdownParser instance.
+        /// </summary>
+        /// <param name="pathToFile">Path to checking file.</param>
         public MarkdownParser(string pathToFile)
         {
             this._pathToFile = pathToFile;
@@ -76,6 +73,7 @@ namespace MarkdownHandler
             _logger.Log.Info("File: {0} contains {1} lines, {2} images, {3} tables and {4} caption",
                 _pathToFile, lines.Length, countImage, countTable, countCaption);
             _report.Data.Add(_pathToFile, new int[] { lines.Length, countImage, countTable, countCaption });
+            //TODO:
             _report.Summary["count of images"] += countImage;
             _report.Summary["count of tables"] += countTable;
             _report.Summary["count of caption"] += countCaption;
@@ -104,13 +102,6 @@ namespace MarkdownHandler
                 return null;
             }
             return lines;
-        }
-
-        private static List<String> ReadAppSettings(String tagName)
-        {
-            tagName = tagName.Replace("_", "");
-            List<String> result = SettingsReader.ReadAppSettings(tagName).ToList();
-            return result;
         }
     }
 }

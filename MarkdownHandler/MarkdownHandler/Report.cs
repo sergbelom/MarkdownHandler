@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 
 namespace MarkdownHandler
 {
@@ -26,6 +25,7 @@ namespace MarkdownHandler
         {
             _data = new SortedDictionary<String, int[]>();
             _summary = new Dictionary<String, int>();
+            //TODO:
             _summary.Add("count of files", 0);
             _summary.Add("count of images", 0);
             _summary.Add("count of tables", 0);

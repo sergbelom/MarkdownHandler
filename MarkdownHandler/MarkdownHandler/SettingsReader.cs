@@ -4,9 +4,8 @@ using System.Collections.Specialized;
 
 namespace MarkdownHandler
 {
-    static class SettingsReader
+    class SettingsReader
     {
-        //todo: may be need settings for markdown extnatial
         /// <summary>
         /// Read tags from AppSettings
         /// </summary>
@@ -14,6 +13,7 @@ namespace MarkdownHandler
         /// <returns>Tags collection</returns>
         public static ICollection<String> ReadAppSettings(string nameTags)
         {
+            nameTags = nameTags.Replace("_", "");
             try
             {
                 ICollection<String> result = new List<String>();

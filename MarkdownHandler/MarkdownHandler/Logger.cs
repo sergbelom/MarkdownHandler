@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using NLog;
 
 namespace MarkdownHandler
@@ -11,7 +9,7 @@ namespace MarkdownHandler
         public NLog.Logger Log;
 
         /// <summary>
-        /// Create log instance 
+        /// Create log instance.
         /// </summary>
         public Logger()
         {

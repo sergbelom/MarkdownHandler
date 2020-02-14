@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 using CommandLine;
-using System.Collections.Specialized;
 
 namespace MarkdownHandler
 {
